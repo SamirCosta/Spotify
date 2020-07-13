@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Pesquisar no Spotify</string>
+    <string name="btnFaixas">Procurar por faixas</string>
+    <string name="btnArtistas">Procurar por artistas</string>
+    <string name="btnAlbuns">Procurar por álbuns</string>
+    <string name="tvTrack">Digite o nome da faixa:</string>
+    <string name="btnPesq">Pesquisar</string>
+</resources>
