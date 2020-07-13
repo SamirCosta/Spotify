@@ -156,7 +156,6 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                 }
             }
         });
-
         return view;
     }
 
