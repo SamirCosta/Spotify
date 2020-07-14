@@ -4,5 +4,6 @@
     <string name="btnArtistas">Procurar por artistas</string>
     <string name="btnAlbuns">Procurar por álbuns</string>
     <string name="tvTrack">Digite o nome da faixa:</string>
+    <string name="tvArt">Digite o nome do artista:</string>
     <string name="btnPesq">Pesquisar</string>
 </resources>

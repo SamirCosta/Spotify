@@ -94,8 +94,6 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
             getLoaderManager().initLoader(0, null, this);
         }
 
-
-
     }
 
 

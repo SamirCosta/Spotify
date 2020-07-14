@@ -17,7 +17,7 @@ public class Requester {
     private static final String SPOTIFY_URL = "https://api.spotify.com/v1/search?";
     private static final String QUERY_PARAM = "q";
     private static final String TYPE = "type";
-    private static final String TOKEN = "BQDL7o_LWZMJISXlr9Dvc_R_DqeI_OjBW4YRpbRqjJRlPD6RtmYbiv6c2k1WWhMGBghvPG3yXHbfx1aD8Wq4cN4bIILBjpcX5g3xKvcqP7Me5dgbLFGYo7qeeRiZ1mrGiam7xyINmApM_Q";
+    private static final String TOKEN = "BQCHTKG3_RY67hPBRUH3aC6H6aD9MDWdN7UOyLNmbGuj6J4UKwoqYwYpdakMTmTHBjfFYU4Ei7TlI1YXL-q4hCF_kuyI4SvpDDQFUik2OxsuAbtlyd5WnB7QJyLojQQFcQFWRL85lXM3vg";
     private static final String URL_TOKEN = "https://accounts.spotify.com/api/token";
     private static final String CLIENT_ID = "88937418052d43a5ab4f99950f05a2bf";
     private static final String CLIENT_SECRET = "cb39035ded114ad5bb0e0f0ded110954";
