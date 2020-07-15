@@ -1,6 +1,7 @@
 package com.samir.spotifyapi.loader;
 
 import android.net.Uri;
+import android.util.Base64;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -24,12 +25,12 @@ public class Requester {
     private static final String GRANT_TYPE = "grant_type";
     private static final String STRING_GRANT = "client_credentials";
 
-    public static String searchJSON(String param){
+    public static String searchJSON(String param) {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
-        String bookJSONString = null;
+        String bookJSONString2 = null;
 
-        try{
+        try {
             Uri builtURI = Uri.parse(SPOTIFY_URL).buildUpon()
                     .appendQueryParameter(QUERY_PARAM, param)
                     .appendQueryParameter(TYPE, "track,artist,album")
@@ -58,10 +59,10 @@ public class Requester {
             if (builder.length() == 0) {
                 return null;
             }
-            bookJSONString = builder.toString();
+            bookJSONString2 = builder.toString();
 
 
-        }catch (MalformedURLException | ProtocolException e){
+        } catch (MalformedURLException | ProtocolException e) {
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -78,32 +79,41 @@ public class Requester {
             }
         }
         //Log.d(LOG_TAG, bookJSONString);
-        return bookJSONString;
+        return bookJSONString2;
     }
 
-    public static String tokenReturn(){
+    public static String tokenReturn() {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String bookJSONString = null;
         try {
-        Uri builtURI = Uri.parse(URL_TOKEN).buildUpon().build();
 
-        URL requestURL = new URL(builtURI.toString());
+            URL requestURL = new URL(URL_TOKEN);
 
-        urlConnection = (HttpURLConnection) requestURL.openConnection();
-        urlConnection.setRequestMethod("POST");
-        urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        urlConnection.setRequestProperty(GRANT_TYPE, STRING_GRANT);
-        urlConnection.setRequestProperty("Authorization:", "Basic " + CLIENT_ID+":"+CLIENT_SECRET);
-        urlConnection.setDoOutput(true);
-        urlConnection.connect();
+            /*String credentials = CLIENT_ID + ":" + CLIENT_SECRET;
+            byte[] data = credentials.getBytes("UTF-8");
+            String base64 = Base64.encodeToString(data, Base64.DEFAULT);
+*/
+            //String encript = Base64.getEncoder().encodeToString(credentials.getBytes());
+            String credentials ="ODg5Mzc0MTgwNTJkNDNhNWFiNGY5OTk1MGYwNWEyYmY6Y2IzOTAzNWRlZDExNGFkNWJiMGUwZjBkZWQxMTA5NTQ=";
+
+            urlConnection = (HttpURLConnection) requestURL.openConnection();
+            urlConnection.setRequestMethod("POST");
+            //urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            urlConnection.setRequestProperty("Authorization", "Basic " + credentials);
+            urlConnection.setRequestProperty(GRANT_TYPE, STRING_GRANT);
+            //urlConnection.setDoOutput(true);
+            urlConnection.connect();
 
             InputStream inputStream = urlConnection.getInputStream();
+            Log.d(LOG_TAG, "AQUIIIIIIII" + inputStream.toString());
 
             reader = new BufferedReader(new InputStreamReader(inputStream));
+            //Log.d(LOG_TAG, "AQUI"+reader.toString());
 
             StringBuilder builder = new StringBuilder();
             String linha;
+            //Log.d(LOG_TAG, "AQUI"+builder.toString());
 
             while ((linha = reader.readLine()) != null) {
                 builder.append(linha);
@@ -122,7 +132,7 @@ public class Requester {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        // Log.d(LOG_TAG, "AQUI"+bookJSONString);
         return bookJSONString;
     }
 

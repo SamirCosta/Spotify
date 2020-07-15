@@ -28,7 +28,7 @@ public class LoadParam extends AsyncTaskLoader<String> {
     @Nullable
     @Override
     public String loadInBackground() {
-        /*String JSONSearch = null;
+        String JSONSearch = null;
         try {
             String JSONtoken = Requester.tokenReturn();
             JSONObject json = new JSONObject(JSONtoken);
@@ -41,7 +41,7 @@ public class LoadParam extends AsyncTaskLoader<String> {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-        }*/
-        return Requester.searchJSON(mParam);
+        }
+        return JSONSearch/*Requester.searchJSON(mParam)*/;
     }
 }
