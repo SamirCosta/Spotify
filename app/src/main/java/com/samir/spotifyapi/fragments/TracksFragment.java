@@ -1,9 +1,7 @@
 package com.samir.spotifyapi.fragments;
 
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -12,17 +10,14 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -37,58 +32,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TracksFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class TracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>{
     private EditText param;
     private ImageView pic, btSpot;
-    private TextView artName;
+    private TextView artName, musicName;
     private Button btPesq;
     private String stringParam;
     private ProgressBar progressBar;
     private String uriSpotify = "";
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public TracksFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TracksFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static TracksFragment newInstance(String param1, String param2) {
-        TracksFragment fragment = new TracksFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
         if (getLoaderManager().getLoader(0) != null) {
             getLoaderManager().initLoader(0, null, this);
@@ -96,15 +51,14 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracks, container, false);
         param = view.findViewById(R.id.editText);
         pic = view.findViewById(R.id.imageView);
-        artName = view.findViewById(R.id.textViewName);
+        artName = view.findViewById(R.id.tvNameArtist);
+        musicName = view.findViewById(R.id.textViewNameTrack);
         btPesq = view.findViewById(R.id.btnPesqTrack);
         progressBar = view.findViewById(R.id.progressBar);
         btSpot = view.findViewById(R.id.btOpenSpot);
@@ -176,6 +130,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 
             String trackName = null;
             String urlImg = null;
+            String mscName = null;
 
             int i = 0;
             while (i < itemsArray.length() && trackName == null){
@@ -184,6 +139,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                 JSONArray img = album.getJSONArray("images");
 
                 uriSpotify = book.getString("uri");
+                mscName = book.getString("name");
 
                 int im = 0;
                 while (im < img.length() && trackName == null) {
@@ -205,9 +161,10 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                 i++;
             }
 
-            if (trackName != null) {
+            if (trackName != null && mscName != null && urlImg != null) {
                 progressBar.setVisibility(View.GONE);
                 artName.setText(trackName);
+                musicName.setText(mscName);
 
                 Uri uriimg = Uri.parse(urlImg);
                 Glide.with(this)

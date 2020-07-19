@@ -1,9 +1,7 @@
 package com.samir.spotifyapi.fragments;
 
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -12,16 +10,15 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -36,58 +33,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ArtistsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+
 public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>{
     private EditText param;
     private ImageView pic, btSpot;
-    private TextView artName;
+    private TextView artName, tvGenero;
     private Button btPesq;
     private String stringParam;
     private ProgressBar progressBar;
     private String uriSpotify = "";
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public ArtistsFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ArtistsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ArtistsFragment newInstance(String param1, String param2) {
-        ArtistsFragment fragment = new ArtistsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
         if (getLoaderManager().getLoader(0) != null) {
             getLoaderManager().initLoader(0, null, this);
         }
@@ -102,8 +62,9 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         pic = view.findViewById(R.id.imageViewArt);
         artName = view.findViewById(R.id.textViewNameArt);
         btPesq = view.findViewById(R.id.btnPesqArt);
-        progressBar = view.findViewById(R.id.progressBarArt);
+        progressBar = view.findViewById(R.id.progressBarAlbum);
         btSpot = view.findViewById(R.id.btOpenSpotArt);
+        tvGenero = view.findViewById(R.id.tvGen);
 
         progressBar.setVisibility(View.GONE);
 
@@ -173,21 +134,29 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
 
             String trackName = null;
             String urlImg = null;
+            ArrayList<String> generosString = new ArrayList<>();
 
             int i = 0;
             while (i < itemsArray.length() && trackName == null){
                 JSONObject book = itemsArray.getJSONObject(i);
-                //JSONObject album = book.getJSONObject("album");
+
+                JSONArray generos = book.getJSONArray("genres");
+                int gn = 0;
+                while (gn < generos.length()){
+
+                    generosString.add(generos.get(gn).toString());
+                    gn++;
+                }
+
                 JSONArray img = book.getJSONArray("images");
 
                 uriSpotify = book.getString("uri");
-                trackName = book.getString("popularity");
+                trackName = book.getString("name");
 
                 int im = 0;
                 while (im < img.length()) {
                     JSONObject book2 = img.getJSONObject(1);
                     urlImg  = book2.getString("url");
-                    //Log.d(LOG_TAG, urlImg);
                     im++;
                 }
 
@@ -197,6 +166,11 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
             if (trackName != null) {
                 progressBar.setVisibility(View.GONE);
                 artName.setText(trackName);
+                String generosFim = generosString.toString();
+                generosFim = generosFim.replace("[","");
+                generosFim = generosFim.replace("]","");
+                Log.i("ARRAY", generosFim);
+                tvGenero.setText("Gêneros: "+generosFim);
 
                 Uri uriimg = Uri.parse(urlImg);
                 Glide.with(this)
@@ -208,7 +182,6 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            //Log.d(LOG_TAG, "AQUI");
         }
     }
 

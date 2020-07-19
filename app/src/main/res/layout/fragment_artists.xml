@@ -10,7 +10,7 @@
         android:id="@+id/textViewArt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:text="@string/tvArt"
         android:textColor="#000000"
         android:textSize="18sp"
@@ -24,7 +24,7 @@
         android:layout_width="130dp"
         android:layout_height="61dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="35dp"
         android:background="#107B11"
         android:text="@string/btnPesq"
@@ -49,7 +49,7 @@
         android:id="@+id/imageViewArt"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
@@ -58,26 +58,30 @@
 
     <TextView
         android:id="@+id/textViewNameArt"
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="4dp"
+        android:gravity="clip_horizontal"
         android:textColor="#000000"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="30sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewArt" />
 
     <ImageView
         android:id="@+id/btOpenSpotArt"
-        android:layout_width="179dp"
-        android:layout_height="109dp"
-        android:layout_marginTop="20dp"
+        android:layout_width="300dp"
+        android:layout_height="81dp"
+        android:layout_marginTop="16dp"
+        android:scaleType="centerCrop"
         android:src="@drawable/spotify_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewNameArt" />
+        app:layout_constraintTop_toBottomOf="@+id/tvGen" />
 
     <ProgressBar
-        android:id="@+id/progressBarArt"
+        android:id="@+id/progressBarAlbum"
         style="?android:attr/progressBarStyle"
         android:layout_width="80dp"
         android:layout_height="75dp"
@@ -85,6 +89,14 @@
         app:layout_constraintEnd_toEndOf="@+id/imageViewArt"
         app:layout_constraintStart_toStartOf="@+id/imageViewArt"
         app:layout_constraintTop_toTopOf="@+id/imageViewArt" />
+
+    <TextView
+        android:id="@+id/tvGen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewNameArt" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

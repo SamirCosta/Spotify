@@ -43,6 +43,4 @@ public class SearchActivity extends AppCompatActivity {
         viewPager.setCurrentItem(pos);
 
     }
-
-
 }

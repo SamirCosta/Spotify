@@ -31,17 +31,17 @@ public class LoadParam extends AsyncTaskLoader<String> {
         String JSONSearch = null;
         try {
             String JSONtoken = Requester.tokenReturn();
+            Log.i("JSON TOKEN", ""+JSONtoken);
             JSONObject json = new JSONObject(JSONtoken);
             String token = json.getString("access_token");
-            JSONSearch = null;
             if (token != null) {
-                JSONSearch = Requester.searchJSON(mParam);
+                JSONSearch = Requester.searchJSON(mParam, token);
             }else{
                 Toast.makeText(getContext(), "Token inválido", Toast.LENGTH_LONG).show();
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return JSONSearch/*Requester.searchJSON(mParam)*/;
+        return JSONSearch;
     }
 }

@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -18,14 +19,11 @@ public class Requester {
     private static final String SPOTIFY_URL = "https://api.spotify.com/v1/search?";
     private static final String QUERY_PARAM = "q";
     private static final String TYPE = "type";
-    private static final String TOKEN = "BQCHTKG3_RY67hPBRUH3aC6H6aD9MDWdN7UOyLNmbGuj6J4UKwoqYwYpdakMTmTHBjfFYU4Ei7TlI1YXL-q4hCF_kuyI4SvpDDQFUik2OxsuAbtlyd5WnB7QJyLojQQFcQFWRL85lXM3vg";
     private static final String URL_TOKEN = "https://accounts.spotify.com/api/token";
-    private static final String CLIENT_ID = "88937418052d43a5ab4f99950f05a2bf";
-    private static final String CLIENT_SECRET = "cb39035ded114ad5bb0e0f0ded110954";
-    private static final String GRANT_TYPE = "grant_type";
-    private static final String STRING_GRANT = "client_credentials";
+    private static final String GRANT_TYPE = "grant_type=client_credentials";
 
-    public static String searchJSON(String param) {
+    public static String searchJSON(String param, String token) {
+        String TOKEN = token;
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String bookJSONString2 = null;
@@ -78,7 +76,7 @@ public class Requester {
                 }
             }
         }
-        //Log.d(LOG_TAG, bookJSONString);
+        Log.d(LOG_TAG, bookJSONString2);
         return bookJSONString2;
     }
 
@@ -97,13 +95,27 @@ public class Requester {
             //String encript = Base64.getEncoder().encodeToString(credentials.getBytes());
             String credentials ="ODg5Mzc0MTgwNTJkNDNhNWFiNGY5OTk1MGYwNWEyYmY6Y2IzOTAzNWRlZDExNGFkNWJiMGUwZjBkZWQxMTA5NTQ=";
 
+//            URL url = new URL ("https://reqres.in/api/users");
+            /*HttpURLConnection con = (HttpURLConnection)requestURL.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            con.setRequestProperty("Accept", "application/json");
+            con.setDoOutput(true);*/
+
             urlConnection = (HttpURLConnection) requestURL.openConnection();
+            urlConnection.setDoOutput(true);
             urlConnection.setRequestMethod("POST");
-            //urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             urlConnection.setRequestProperty("Authorization", "Basic " + credentials);
-            urlConnection.setRequestProperty(GRANT_TYPE, STRING_GRANT);
-            //urlConnection.setDoOutput(true);
-            urlConnection.connect();
+
+            OutputStream outputStream = urlConnection.getOutputStream();
+            outputStream.write(GRANT_TYPE.getBytes());
+            outputStream.flush();
+            outputStream.close();
+
+            //urlConnection.connect();
+
+            //urlConnection.getResponseCode();
 
             InputStream inputStream = urlConnection.getInputStream();
             Log.d(LOG_TAG, "AQUIIIIIIII" + inputStream.toString());
