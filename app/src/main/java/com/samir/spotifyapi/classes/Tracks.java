@@ -1,6 +1,8 @@
 package com.samir.spotifyapi.classes;
 
-public class Tracks {
+import java.io.Serializable;
+
+public class Tracks implements Serializable {
 
     String musicName;
     String artistName;

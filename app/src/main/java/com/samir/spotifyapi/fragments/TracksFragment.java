@@ -46,9 +46,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
     private Button btPesq;
     private String stringParam;
     private String uriSpotify = "";
-    /*private ImageView pic, btSpot;
-    private TextView artName, musicName;
-    private ProgressBar progressBar;*/
+    private ProgressBar progressBar;
     private RecyclerView recyclerView;
     private ArrayList<Tracks> arrayListTracks = new ArrayList<>();
 
@@ -73,11 +71,10 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayout.VERTICAL));
 
-        TrackAdapter trackAdapter = new TrackAdapter(arrayListTracks);
+        TrackAdapter trackAdapter = new TrackAdapter(arrayListTracks, getActivity());
         recyclerView.setAdapter(trackAdapter);
 
-        /*progressBar.setVisibility(View.GONE);
-        btSpot.setVisibility(View.INVISIBLE);*/
+        progressBar.setVisibility(View.GONE);
 
         btPesq.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,8 +176,8 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                 i++;
             }
 
-            /*if (trackName != null && mscName != null && urlImg != null) {
                 progressBar.setVisibility(View.GONE);
+            /*if (trackName != null && mscName != null && urlImg != null) {
                 artName.setText(trackName);
                 musicName.setText(mscName);
 
@@ -203,8 +200,9 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void pesquisa(){
-        /*progressBar.setVisibility(View.VISIBLE);
-        btSpot.setVisibility(View.VISIBLE);*/
+        progressBar.setVisibility(View.VISIBLE);
+        if (arrayListTracks != null)
+            arrayListTracks.clear();
         Bundle queryBundle = new Bundle();
         queryBundle.putString("parameter", stringParam);
         getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
@@ -212,12 +210,8 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 
     private void ref(View view) {
         param = view.findViewById(R.id.editText);
-        /*pic = view.findViewById(R.id.imageView);
-        artName = view.findViewById(R.id.tvNameArtist);
-        musicName = view.findViewById(R.id.textViewNameTrack);*/
         btPesq = view.findViewById(R.id.btnPesqTrack);
-//        progressBar = view.findViewById(R.id.progressBar);
-//        btSpot = view.findViewById(R.id.btOpenSpot);
+        progressBar = view.findViewById(R.id.progressBarTracksRecycler);
         recyclerView = view.findViewById(R.id.recyclerTracks);
     }
 

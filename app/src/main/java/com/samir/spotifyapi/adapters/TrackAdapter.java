@@ -1,24 +1,28 @@
 package com.samir.spotifyapi.adapters;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.samir.spotifyapi.R;
+import com.samir.spotifyapi.activities.TrackDetailsActivity;
 import com.samir.spotifyapi.classes.Tracks;
 
 import java.util.ArrayList;
 
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.MyViewHolder> {
     private ArrayList<Tracks> arrayListTracks;
+    private Context context;
 
-    public TrackAdapter(ArrayList<Tracks> arrayList){
+    public TrackAdapter(ArrayList<Tracks> arrayList, Context context){
         this.arrayListTracks = arrayList;
+        this.context = context;
     }
 
     @NonNull
@@ -33,6 +37,11 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.MyViewHolder
         Tracks tracks = arrayListTracks.get(position);
         holder.tvMusic.setText(tracks.getMusicName());
         holder.tvArt.setText(tracks.getArtistName());
+        holder.itemView.setOnClickListener(c -> {
+            Intent intent = new Intent(context, TrackDetailsActivity.class);
+            intent.putExtra("object", tracks);
+            context.startActivity(intent);
+        });
     }
 
     @Override
