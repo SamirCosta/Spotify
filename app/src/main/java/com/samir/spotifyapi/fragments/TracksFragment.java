@@ -12,7 +12,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,17 +24,22 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.samir.spotifyapi.R;
+import com.samir.spotifyapi.adapters.TrackAdapter;
+import com.samir.spotifyapi.classes.Tracks;
 import com.samir.spotifyapi.loader.LoadParam;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class TracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>{
     private EditText param;
@@ -40,6 +49,8 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
     private String stringParam;
     private ProgressBar progressBar;
     private String uriSpotify = "";
+    private RecyclerView recyclerView;
+    private ArrayList<Tracks> arrayListTracks = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,16 +66,17 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tracks, container, false);
-        param = view.findViewById(R.id.editText);
-        pic = view.findViewById(R.id.imageView);
-        artName = view.findViewById(R.id.tvNameArtist);
-        musicName = view.findViewById(R.id.textViewNameTrack);
-        btPesq = view.findViewById(R.id.btnPesqTrack);
-        progressBar = view.findViewById(R.id.progressBar);
-        btSpot = view.findViewById(R.id.btOpenSpot);
+        ref(view);
+
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayout.VERTICAL));
+
+        TrackAdapter trackAdapter = new TrackAdapter(arrayListTracks);
+        recyclerView.setAdapter(trackAdapter);
 
         progressBar.setVisibility(View.GONE);
-
         btSpot.setVisibility(View.INVISIBLE);
 
         btPesq.setOnClickListener(new View.OnClickListener() {
@@ -131,6 +143,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
             String trackName = null;
             String urlImg = null;
             String mscName = null;
+            Tracks tracks = new Tracks();
 
             int i = 0;
             while (i < itemsArray.length() && trackName == null){
@@ -140,12 +153,14 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 
                 uriSpotify = book.getString("uri");
                 mscName = book.getString("name");
+                tracks.setMusicUri(uriSpotify);
+                tracks.setMusicName(mscName);
 
                 int im = 0;
                 while (im < img.length() && trackName == null) {
                     JSONObject book2 = img.getJSONObject(1);
                     urlImg  = book2.getString("url");
-                    //Log.d(LOG_TAG, urlImg);
+                    tracks.setImgUrl(urlImg);
                     im++;
                 }
 
@@ -155,9 +170,11 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                 while (a < artistaArray.length() && trackName == null) {
                     JSONObject book2 = artistaArray.getJSONObject(a);
                     trackName  = book2.getString("name");
-
+                    tracks.setArtistName(trackName);
                     a++;
                 }
+                arrayListTracks.add(tracks);
+                recyclerView.getAdapter().notifyDataSetChanged();
                 i++;
             }
 
@@ -176,7 +193,6 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            //Log.d(LOG_TAG, "AQUI");
         }
     }
 
@@ -192,4 +208,16 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         queryBundle.putString("parameter", stringParam);
         getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
     }
+
+    private void ref(View view) {
+        param = view.findViewById(R.id.editText);
+        pic = view.findViewById(R.id.imageView);
+        artName = view.findViewById(R.id.tvNameArtist);
+        musicName = view.findViewById(R.id.textViewNameTrack);
+        btPesq = view.findViewById(R.id.btnPesqTrack);
+        progressBar = view.findViewById(R.id.progressBar);
+        btSpot = view.findViewById(R.id.btOpenSpot);
+        recyclerView = view.findViewById(R.id.recyclerTracks);
+    }
+
 }
