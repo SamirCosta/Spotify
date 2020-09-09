@@ -43,12 +43,12 @@ import java.util.ArrayList;
 
 public class TracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>{
     private EditText param;
-    private ImageView pic, btSpot;
-    private TextView artName, musicName;
     private Button btPesq;
     private String stringParam;
-    private ProgressBar progressBar;
     private String uriSpotify = "";
+    /*private ImageView pic, btSpot;
+    private TextView artName, musicName;
+    private ProgressBar progressBar;*/
     private RecyclerView recyclerView;
     private ArrayList<Tracks> arrayListTracks = new ArrayList<>();
 
@@ -76,8 +76,8 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         TrackAdapter trackAdapter = new TrackAdapter(arrayListTracks);
         recyclerView.setAdapter(trackAdapter);
 
-        progressBar.setVisibility(View.GONE);
-        btSpot.setVisibility(View.INVISIBLE);
+        /*progressBar.setVisibility(View.GONE);
+        btSpot.setVisibility(View.INVISIBLE);*/
 
         btPesq.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,7 +111,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
             }
         });
 
-        btSpot.setOnClickListener(new View.OnClickListener() {
+        /*btSpot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (uriSpotify != null) {
@@ -119,7 +119,8 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                     startActivity(intent);
                 }
             }
-        });
+        });*/
+
         return view;
     }
 
@@ -140,13 +141,13 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
             JSONObject tracksPrincipal = jsonObject.getJSONObject("tracks");
             JSONArray itemsArray = tracksPrincipal.getJSONArray("items");
 
-            String trackName = null;
+            String artistName = null;
             String urlImg = null;
             String mscName = null;
-            Tracks tracks = new Tracks();
 
             int i = 0;
-            while (i < itemsArray.length() && trackName == null){
+            while (i < itemsArray.length()){
+                Tracks tracks = new Tracks();
                 JSONObject book = itemsArray.getJSONObject(i);
                 JSONObject album = book.getJSONObject("album");
                 JSONArray img = album.getJSONArray("images");
@@ -157,7 +158,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                 tracks.setMusicName(mscName);
 
                 int im = 0;
-                while (im < img.length() && trackName == null) {
+                while (im < img.length()) {
                     JSONObject book2 = img.getJSONObject(1);
                     urlImg  = book2.getString("url");
                     tracks.setImgUrl(urlImg);
@@ -167,10 +168,10 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                 JSONArray artistaArray = book.getJSONArray("artists");
 
                 int a = 0;
-                while (a < artistaArray.length() && trackName == null) {
+                while (a < artistaArray.length()) {
                     JSONObject book2 = artistaArray.getJSONObject(a);
-                    trackName  = book2.getString("name");
-                    tracks.setArtistName(trackName);
+                    artistName  = book2.getString("name");
+                    tracks.setArtistName(artistName);
                     a++;
                 }
                 arrayListTracks.add(tracks);
@@ -178,7 +179,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                 i++;
             }
 
-            if (trackName != null && mscName != null && urlImg != null) {
+            /*if (trackName != null && mscName != null && urlImg != null) {
                 progressBar.setVisibility(View.GONE);
                 artName.setText(trackName);
                 musicName.setText(mscName);
@@ -190,7 +191,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 
             } else {
                 artName.setText("Nenhum resltado");
-            }
+            }*/
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -202,8 +203,8 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void pesquisa(){
-        progressBar.setVisibility(View.VISIBLE);
-        btSpot.setVisibility(View.VISIBLE);
+        /*progressBar.setVisibility(View.VISIBLE);
+        btSpot.setVisibility(View.VISIBLE);*/
         Bundle queryBundle = new Bundle();
         queryBundle.putString("parameter", stringParam);
         getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
@@ -211,12 +212,12 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 
     private void ref(View view) {
         param = view.findViewById(R.id.editText);
-        pic = view.findViewById(R.id.imageView);
+        /*pic = view.findViewById(R.id.imageView);
         artName = view.findViewById(R.id.tvNameArtist);
-        musicName = view.findViewById(R.id.textViewNameTrack);
+        musicName = view.findViewById(R.id.textViewNameTrack);*/
         btPesq = view.findViewById(R.id.btnPesqTrack);
-        progressBar = view.findViewById(R.id.progressBar);
-        btSpot = view.findViewById(R.id.btOpenSpot);
+//        progressBar = view.findViewById(R.id.progressBar);
+//        btSpot = view.findViewById(R.id.btOpenSpot);
         recyclerView = view.findViewById(R.id.recyclerTracks);
     }
 
