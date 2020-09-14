@@ -21,19 +21,32 @@ public class Requester {
     private static final String TYPE = "type";
     private static final String URL_TOKEN = "https://accounts.spotify.com/api/token";
     private static final String GRANT_TYPE = "grant_type=client_credentials";
+    private static final String MARKET = "market";
 
-    public static String searchJSON(String param, String token) {
+    public static String searchJSON(String param, String country, String token) {
         String TOKEN = token;
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String bookJSONString2 = null;
 
         try {
-            Uri builtURI = Uri.parse(SPOTIFY_URL).buildUpon()
-                    .appendQueryParameter(QUERY_PARAM, param)
-                    .appendQueryParameter(TYPE, "track,artist,album")
-                    //.appendQueryParameter(LIMIT, "1")
-                    .build();
+            Uri builtURI = null;
+
+            if (country == null){
+                builtURI = Uri.parse(SPOTIFY_URL).buildUpon()
+                        .appendQueryParameter(QUERY_PARAM, param)
+                        .appendQueryParameter(TYPE, "track,artist,album")
+                        //.appendQueryParameter(LIMIT, "1")
+                        .build();
+            }else {
+                builtURI = Uri.parse(SPOTIFY_URL).buildUpon()
+                        .appendQueryParameter(QUERY_PARAM, param)
+                        .appendQueryParameter(TYPE, "track,artist,album")
+                        .appendQueryParameter(MARKET, country)
+                        //.appendQueryParameter(LIMIT, "1")
+                        .build();
+                Log.d("COUNTRY", country);
+            }
 
             URL requestURL = new URL(builtURI.toString());
 
@@ -76,7 +89,7 @@ public class Requester {
                 }
             }
         }
-        Log.d(LOG_TAG, bookJSONString2);
+//        Log.d(LOG_TAG, bookJSONString2);
         return bookJSONString2;
     }
 

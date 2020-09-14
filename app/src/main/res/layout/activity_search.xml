@@ -7,6 +7,44 @@
     tools:context=".activities.SearchActivity"
     android:orientation="vertical">
 
+    <!--<androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:backgroundTint="@color/colorPrimary"
+        >
+
+        <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FAV SONGS"
+        android:layout_gravity="end|center_vertical"
+        android:layout_marginEnd="15dp"
+        android:textColor="@android:color/white"
+        />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Search on Spotify"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="15dp"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            />
+
+    </androidx.cardview.widget.CardView>-->
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="@string/app_name"
+        app:titleTextColor="@android:color/white"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme" />
+
     <com.ogaclejapan.smarttablayout.SmartTabLayout
         android:id="@+id/viewPagerTab"
         android:layout_width="match_parent"
@@ -32,10 +70,10 @@
         app:stl_indicatorThickness="4dp"
         app:stl_indicatorWidth="auto"
         app:stl_indicatorWithoutPadding="false"
-        app:stl_overlineColor="#4D000000"
+        app:stl_overlineColor="@android:color/transparent"
         app:stl_overlineThickness="0dp"
         app:stl_titleOffset="24dp"
-        app:stl_underlineColor="#4D000000"
+        app:stl_underlineColor="@android:color/transparent"
         app:stl_underlineThickness="1dp" />
 
     <androidx.viewpager.widget.ViewPager

@@ -12,16 +12,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.TrackDetailsActivity"></activity>
-        <activity android:name=".activities.SearchActivity" />
+        <activity android:name=".activities.ZoomActivity"></activity>
         <activity
-            android:name=".activities.MainActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            android:name=".activities.FavsActivity"
+            android:parentActivityName=".activities.SearchActivity" />
+        <activity android:name=".activities.SearchActivity" />
+        <activity android:name=".activities.TrackDetailsActivity" />
+        <activity
+            android:name=".activities.LoginActivity"
+            android:theme="@style/LoginTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
     </application>
 

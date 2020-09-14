@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <shortcut
+        android:shortcutId="tracks"
+        android:icon="@drawable/ic_baseline_music_note_24"
+        android:shortcutShortLabel="@string/tracks">
+
+        <intent
+            android:targetClass="com.samir.spotifyapi.activities.LoginActivity"
+            android:targetPackage="com.samir.spotifyapi"
+            android:action="com.samir.spotifyapi.SHORT_TRACK"
+            />
+
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="artists"
+        android:icon="@drawable/ic_baseline_record_voice_over_24"
+        android:shortcutShortLabel="@string/artists">
+
+        <intent
+            android:targetClass="com.samir.spotifyapi.activities.LoginActivity"
+            android:targetPackage="com.samir.spotifyapi"
+            android:action="com.samir.spotifyapi.SHORT_ARTISTS"
+            />
+
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="albums"
+        android:icon="@drawable/ic_baseline_album_24"
+        android:shortcutShortLabel="@string/albums">
+
+        <intent
+            android:targetClass="com.samir.spotifyapi.activities.LoginActivity"
+            android:targetPackage="com.samir.spotifyapi"
+            android:action="com.samir.spotifyapi.SHORT_ALBUMS"
+            />
+
+    </shortcut>
+
+</shortcuts>

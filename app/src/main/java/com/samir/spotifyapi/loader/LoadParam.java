@@ -13,10 +13,17 @@ import org.json.JSONObject;
 
 public class LoadParam extends AsyncTaskLoader<String> {
     String mParam;
+    String mCountry;
 
     public LoadParam(@NonNull Context context, String param) {
         super(context);
         mParam = param;
+    }
+
+    public LoadParam(@NonNull Context context, String param, String country) {
+        super(context);
+        mParam = param;
+        mCountry = country;
     }
 
     @Override
@@ -35,7 +42,7 @@ public class LoadParam extends AsyncTaskLoader<String> {
             JSONObject json = new JSONObject(JSONtoken);
             String token = json.getString("access_token");
             if (token != null) {
-                JSONSearch = Requester.searchJSON(mParam, token);
+                JSONSearch = Requester.searchJSON(mParam, mCountry, token);
             }else{
                 Toast.makeText(getContext(), "Token inválido", Toast.LENGTH_LONG).show();
             }
