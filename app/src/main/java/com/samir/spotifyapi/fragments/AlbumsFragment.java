@@ -1,5 +1,6 @@
 package com.samir.spotifyapi.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -9,37 +10,51 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.samir.spotifyapi.R;
+import com.samir.spotifyapi.adapters.AlbumsAdapter;
+import com.samir.spotifyapi.adapters.TrackAdapter;
+import com.samir.spotifyapi.classes.Albums;
+import com.samir.spotifyapi.classes.Tracks;
 import com.samir.spotifyapi.loader.LoadParam;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>{
+import java.util.ArrayList;
+
+public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCallbacks<String> {
     private EditText param;
-    private ImageView pic, btSpot;
-    private TextView artName, tvNumFaixas;
-    private Button btPesq;
-    private String stringParam;
+    private String stringParam, country;
     private ProgressBar progressBar;
-    private String uriSpotify = "";
+    private RecyclerView recyclerView;
+    private CardView btPesq, locale;
+    private TextView tvPesq;
+    private ImageView searchAlb;
+    private ArrayList<Albums> albumsArrayList = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,119 +70,129 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_albums, container, false);
-        param = view.findViewById(R.id.editTextAlbum);
-        pic = view.findViewById(R.id.imageViewAlbum);
-        artName = view.findViewById(R.id.textViewNameAlbum);
-        btPesq = view.findViewById(R.id.btnPesqAlbum);
-        progressBar = view.findViewById(R.id.progressBarAlbum);
-        btSpot = view.findViewById(R.id.btOpenSpotArt);
-        tvNumFaixas = view.findViewById(R.id.tvNumFaixas);
+        ref(view);
 
         progressBar.setVisibility(View.GONE);
 
-        btSpot.setVisibility(View.INVISIBLE);
-
-        btPesq.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stringParam = param.getText().toString();
-
-                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (inputManager != null) {
-                    inputManager.hideSoftInputFromWindow(v.getWindowToken(),
-                            InputMethodManager.HIDE_NOT_ALWAYS);
-                }
-
-                ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = null;
-                if (connMgr != null) {
-                    networkInfo = connMgr.getActiveNetworkInfo();
-                }
-
-                if (networkInfo != null && networkInfo.isConnected() && stringParam.length() != 0) {
-                    pesquisa();
-                }else {
-                    if (stringParam.length() == 0) {
-                        param.setHint("Informe um nome");
-                        param.setHintTextColor( getResources().getColor(R.color.hint));
-                        param.setCompoundDrawablesRelativeWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_baseline_error_outline_24),null,null, null);
-
-                    } else {
-                        Toast.makeText(getContext(), "Verifique sua conexão.", Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
+        btPesq.setOnClickListener(v -> {
+            search(v);
         });
 
-        btSpot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (uriSpotify != null) {
-                    Intent intent = new Intent(Intent.ACTION_DEFAULT, Uri.parse(uriSpotify));
-                    startActivity(intent);
-                }
+        param.setOnEditorActionListener((v, actionId, event) -> {
+
+            if (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode() || actionId == EditorInfo.IME_ACTION_SEARCH) {
+                search(v);
             }
+
+            return false;
         });
+
+        locale.setOnClickListener(c -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setCancelable(false);
+            builder.setTitle("Localização");
+            builder.setMessage("Você está no país: " + getActivity().getResources().getConfiguration().locale.getDisplayCountry()
+                    + "\n\nDeseja procurar somente por álbuns em seus país?");
+            builder.setPositiveButton("Sim", (dialog, which) -> country = getActivity().getResources().getConfiguration().locale.getCountry())
+                    .setNegativeButton("Não", (dialog, which) -> country = null);
+            builder.create();
+            builder.show();
+        });
+
+        recyclerConfig();
 
         return view;
+    }
+
+    private void search(View v) {
+        stringParam = param.getText().toString();
+
+        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (inputManager != null) {
+            inputManager.hideSoftInputFromWindow(v.getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+
+        ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = null;
+        if (connMgr != null) {
+            networkInfo = connMgr.getActiveNetworkInfo();
+        }
+
+        if (networkInfo != null && networkInfo.isConnected() && stringParam.length() != 0) {
+            pesquisa();
+        } else {
+            if (stringParam.length() == 0) {
+                param.setHint("Informe um nome");
+                param.setHintTextColor(getResources().getColor(R.color.hint));
+                param.setCompoundDrawablesRelativeWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_baseline_error_outline_24), null, null, null);
+
+            } else {
+                Toast.makeText(getContext(), "Verifique sua conexão.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void recyclerConfig() {
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayout.VERTICAL));
+
+        AlbumsAdapter albumsAdapter = new AlbumsAdapter(albumsArrayList, getActivity());
+        recyclerView.setAdapter(albumsAdapter);
     }
 
     @NonNull
     @Override
     public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
         String queryString = "";
+        String queryCountry = "";
         if (args != null) {
             queryString = args.getString("parameter");
+            queryCountry = args.getString("country");
         }
-        return new LoadParam(getContext(), queryString);
+        return new LoadParam(getContext(), queryString, queryCountry);
     }
 
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
-        try {
-            JSONObject jsonObject = new JSONObject(data);
-            JSONObject tracksPrincipal = jsonObject.getJSONObject("albums");
-            JSONArray itemsArray = tracksPrincipal.getJSONArray("items");
+        if (albumsArrayList.size() < 20) {
+            try {
+                JSONObject jsonObject = new JSONObject(data);
+                JSONObject tracksPrincipal = jsonObject.getJSONObject("albums");
+                JSONArray itemsArray = tracksPrincipal.getJSONArray("items");
 
-            String trackName = null;
-            String urlImg = null;
-            String totalTracks = null;
+                for (int i = 0; i < itemsArray.length(); i++) {
 
-            int i = 0;
-            while (i < itemsArray.length() && trackName == null){
-                JSONObject book = itemsArray.getJSONObject(i);
+                    Albums albums = new Albums();
+                    JSONObject book = itemsArray.getJSONObject(i);
 
-                trackName = book.getString("name");
-                totalTracks = book.getString("total_tracks");
-                uriSpotify = book.getString("uri");
+                    albums.setAlbumName(book.getString("name"));
+                    albums.setTotalTracks(book.getString("total_tracks"));
+                    albums.setAlbumUri(book.getString("uri"));
+                    albums.setAlbumId(book.getString("id"));
 
-                JSONArray img = book.getJSONArray("images");
-                int im = 0;
-                while (im < img.length()) {
+                    JSONArray img = book.getJSONArray("images");
+
                     JSONObject book2 = img.getJSONObject(1);
-                    urlImg  = book2.getString("url");
-                    im++;
+                    albums.setUrlImg(book2.getString("url"));
+                    JSONObject book3 = img.getJSONObject(2);
+                    albums.setUrlImgSmall(book3.getString("url"));
+
+                    JSONArray artArray = book.getJSONArray("artists");
+                    JSONObject art = artArray.getJSONObject(0);
+                    albums.setAlbumArtName(art.getString("name"));
+
+                    albumsArrayList.add(albums);
+
                 }
 
-                if (trackName != null && uriSpotify != null && urlImg != null && totalTracks != null) {
-                    progressBar.setVisibility(View.GONE);
-                    artName.setText(trackName);
-                    tvNumFaixas.setText("Número de faixas: "+totalTracks);
+                progressBar.setVisibility(View.GONE);
 
-                    Uri uriimg = Uri.parse(urlImg);
-                    Glide.with(this)
-                            .load(uriimg)
-                            .into(pic);
-
-                } else {
-                    artName.setText("Nenhum resltado");
-                }
-
-                i++;
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
@@ -176,12 +201,25 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
-    public void pesquisa(){
+    public void pesquisa() {
         progressBar.setVisibility(View.VISIBLE);
-        btSpot.setVisibility(View.VISIBLE);
+        searchAlb.setVisibility(View.GONE);
+        tvPesq.setVisibility(View.GONE);
+        if (albumsArrayList != null) albumsArrayList.clear();
         Bundle queryBundle = new Bundle();
         queryBundle.putString("parameter", stringParam);
+        queryBundle.putString("country", country);
         getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
+    }
+
+    private void ref(View view) {
+        param = view.findViewById(R.id.editTextAlbum);
+        progressBar = view.findViewById(R.id.progressBarAlbumRecycler);
+        btPesq = view.findViewById(R.id.btnPesqAlbum);
+        locale = view.findViewById(R.id.localeAlbums);
+        recyclerView = view.findViewById(R.id.recyclerAlbums);
+        tvPesq = view.findViewById(R.id.tvSearchAlbums);
+        searchAlb = view.findViewById(R.id.imageViewSearchAlbums);
     }
 
 }

@@ -15,4 +15,38 @@
         android:transitionName="zoom"
         />
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btDownload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:backgroundTint="@android:color/secondary_text_light"
+        android:layout_marginBottom="35dp"
+        app:cardCornerRadius="10dp"
+        >
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_baseline_arrow_downward_24"
+            android:background="@android:color/transparent"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Download Image"
+            android:textSize="20sp"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginStart="50dp"
+            android:layout_marginEnd="15dp"
+            />
+
+    </androidx.cardview.widget.CardView>
+
 </FrameLayout>

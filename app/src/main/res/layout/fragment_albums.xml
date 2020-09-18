@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.AlbumsFragment">
 
-    <TextView
+    <!--<TextView
         android:id="@+id/textViewArt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -32,9 +32,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.12"
         app:layout_constraintStart_toEndOf="@+id/editTextAlbum"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />-->
 
-    <EditText
+    <!--<EditText
         android:id="@+id/editTextAlbum"
         android:layout_width="195dp"
         android:layout_height="43dp"
@@ -43,62 +43,102 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.083"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewArt" />
+        app:layout_constraintTop_toTopOf="parent" />-->
 
-    <ImageView
-        android:id="@+id/imageViewAlbum"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextAlbum"
-        tools:srcCompat="@tools:sample/avatars" />
-
-    <TextView
-        android:id="@+id/textViewNameAlbum"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="4dp"
-        android:gravity="clip_horizontal"
-        android:textColor="#000000"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewAlbum"
-        tools:text="ABBA" />
-
-    <ImageView
-        android:id="@+id/btOpenSpotArt"
-        android:layout_width="295dp"
-        android:layout_height="73dp"
-        android:layout_marginTop="16dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/spotify_btn"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerAlbums"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvNumFaixas" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextAlbum" />
 
     <ProgressBar
-        android:id="@+id/progressBarAlbum"
+        android:id="@+id/progressBarAlbumRecycler"
         style="?android:attr/progressBarStyle"
         android:layout_width="80dp"
-        android:layout_height="75dp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageViewAlbum"
-        app:layout_constraintEnd_toEndOf="@+id/imageViewAlbum"
-        app:layout_constraintStart_toStartOf="@+id/imageViewAlbum"
-        app:layout_constraintTop_toTopOf="@+id/imageViewAlbum" />
+        android:layout_height="80dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/recyclerAlbums"
+        app:layout_constraintEnd_toEndOf="@+id/recyclerAlbums"
+        app:layout_constraintStart_toStartOf="@+id/recyclerAlbums"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/editTextAlbum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:imeOptions="actionSearch"
+        android:hint="@string/tvTrack"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="120dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnPesqAlbum"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:backgroundTint="@color/colorPrimary"
+        app:cardCornerRadius="100dp"
+        android:layout_marginStart="5dp"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerAlbums"
+        app:layout_constraintStart_toEndOf="@+id/editTextAlbum"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_baseline_search_24" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/localeAlbums"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:backgroundTint="@color/colorPrimary"
+        app:cardCornerRadius="100dp"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerAlbums"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btnPesqAlbum"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_baseline_place_24" />
+
+    </androidx.cardview.widget.CardView>
+
 
     <TextView
-        android:id="@+id/tvNumFaixas"
+        android:id="@+id/tvSearchAlbums"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
+        android:text="@string/search_for_albums"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewNameAlbum" />
+        app:layout_constraintTop_toBottomOf="@+id/imageViewSearchAlbums" />
 
-
+    <ImageView
+        android:id="@+id/imageViewSearchAlbums"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_search_black"
+        android:layout_marginBottom="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

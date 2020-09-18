@@ -1,32 +1,35 @@
 package com.samir.spotifyapi.fragments;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.loader.app.LoaderManager;
-import androidx.loader.content.Loader;
-
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.Fragment;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.samir.spotifyapi.R;
+import com.samir.spotifyapi.adapters.ArtistAdapter;
+import com.samir.spotifyapi.classes.Artists;
 import com.samir.spotifyapi.loader.LoadParam;
 
 import org.json.JSONArray;
@@ -35,14 +38,15 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>{
+public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<String> {
     private EditText param;
-    private ImageView pic, btSpot;
-    private TextView artName, tvGenero;
-    private Button btPesq;
     private String stringParam;
     private ProgressBar progressBar;
-    private String uriSpotify = "";
+    private CardView btPesq;
+    private ArrayList<Artists> arrayListArtists = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private TextView tvSearchArt;
+    private ImageView searchArt;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,61 +62,61 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_artists, container, false);
-        param = view.findViewById(R.id.editTextArt);
-        pic = view.findViewById(R.id.imageViewArt);
-        artName = view.findViewById(R.id.textViewNameArt);
-        btPesq = view.findViewById(R.id.btnPesqArt);
-        progressBar = view.findViewById(R.id.progressBarAlbum);
-        btSpot = view.findViewById(R.id.btOpenSpotArt);
-        tvGenero = view.findViewById(R.id.tvGen);
+        ref(view);
 
-        progressBar.setVisibility(View.GONE);
+        btPesq.setOnClickListener(this::search);
 
-        btSpot.setVisibility(View.INVISIBLE);
+        param.setOnEditorActionListener((v, actionId, event) -> {
 
-        btPesq.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stringParam = param.getText().toString();
-
-                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (inputManager != null) {
-                    inputManager.hideSoftInputFromWindow(v.getWindowToken(),
-                            InputMethodManager.HIDE_NOT_ALWAYS);
-                }
-
-                ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = null;
-                if (connMgr != null) {
-                    networkInfo = connMgr.getActiveNetworkInfo();
-                }
-
-                if (networkInfo != null && networkInfo.isConnected() && stringParam.length() != 0) {
-                    pesquisa();
-                }else {
-                    if (stringParam.length() == 0) {
-                        param.setHint("Informe um nome");
-                        param.setHintTextColor( getResources().getColor(R.color.hint));
-                        param.setCompoundDrawablesRelativeWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_baseline_error_outline_24),null,null, null);
-
-                    } else {
-                        Toast.makeText(getContext(), "Verifique sua conexão.", Toast.LENGTH_LONG).show();
-                    }
-                }
+            if (event != null && KeyEvent.KEYCODE_ENTER == event.getKeyCode() || actionId == EditorInfo.IME_ACTION_SEARCH) {
+                search(v);
             }
+
+            return false;
         });
 
-        btSpot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (uriSpotify != null) {
-                    Intent intent = new Intent(Intent.ACTION_DEFAULT, Uri.parse(uriSpotify));
-                    startActivity(intent);
-                }
-            }
-        });
+        recyclerConfig();
 
         return view;
+    }
+
+    private void search(View v) {
+        stringParam = param.getText().toString();
+
+        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (inputManager != null) {
+            inputManager.hideSoftInputFromWindow(v.getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+
+        ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = null;
+        if (connMgr != null) {
+            networkInfo = connMgr.getActiveNetworkInfo();
+        }
+
+        if (networkInfo != null && networkInfo.isConnected() && stringParam.length() != 0) {
+            pesquisa();
+        } else {
+            if (stringParam.length() == 0) {
+                param.setHint("Informe um nome");
+                param.setHintTextColor(getResources().getColor(R.color.hint));
+                param.setCompoundDrawablesRelativeWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_baseline_error_outline_24), null, null, null);
+
+            } else {
+                Toast.makeText(getContext(), "Verifique sua conexão.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void recyclerConfig() {
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayout.VERTICAL));
+
+        ArtistAdapter artistAdapter = new ArtistAdapter(arrayListArtists, getActivity());
+        recyclerView.setAdapter(artistAdapter);
     }
 
     @NonNull
@@ -127,61 +131,54 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
-        try {
-            JSONObject jsonObject = new JSONObject(data);
-            JSONObject tracksPrincipal = jsonObject.getJSONObject("artists");
-            JSONArray itemsArray = tracksPrincipal.getJSONArray("items");
+        if (arrayListArtists.size() < 20) {
+            try {
+                JSONObject jsonObject = new JSONObject(data);
+                JSONObject tracksPrincipal = jsonObject.getJSONObject("artists");
+                JSONArray itemsArray = tracksPrincipal.getJSONArray("items");
 
-            String trackName = null;
-            String urlImg = null;
-            ArrayList<String> generosString = new ArrayList<>();
+                ArrayList<String> generosString = new ArrayList<>();
 
-            int i = 0;
-            while (i < itemsArray.length() && trackName == null){
-                JSONObject book = itemsArray.getJSONObject(i);
+                int i = 0;
+                while (i < itemsArray.length()) {
+                    Artists artists = new Artists();
+                    JSONObject book = itemsArray.getJSONObject(i);
+                    JSONArray generos = book.getJSONArray("genres");
 
-                JSONArray generos = book.getJSONArray("genres");
-                int gn = 0;
-                while (gn < generos.length()){
+                    artists.setArtUri(book.getString("uri"));
+                    artists.setArtName(book.getString("name"));
+                    artists.setIdArt(book.getString("uri"));
 
-                    generosString.add(generos.get(gn).toString());
-                    gn++;
-                }
+                    JSONObject externalsUrl = book.getJSONObject("external_urls");
+                    artists.setArtUrl(externalsUrl.getString("spotify"));
 
-                JSONArray img = book.getJSONArray("images");
+                    JSONArray img = book.getJSONArray("images");
 
-                uriSpotify = book.getString("uri");
-                trackName = book.getString("name");
-
-                int im = 0;
-                while (im < img.length()) {
                     JSONObject book2 = img.getJSONObject(1);
-                    urlImg  = book2.getString("url");
-                    im++;
+                    artists.setUrlImgArt(book2.getString("url"));
+
+                    JSONObject book3 = img.getJSONObject(2);
+                    artists.setUrlImgArtSmall(book3.getString("url"));
+
+                    for (int gn = 0; gn < generos.length(); gn++) {
+                        generosString.add(generos.get(gn).toString());
+                    }
+
+                    String generosFim = generosString.toString();
+                    generosFim = generosFim.replace("[", "");
+                    generosFim = generosFim.replace("]", "");
+                    artists.setGenres(generosFim);
+
+                    arrayListArtists.add(artists);
+                    i++;
                 }
 
-                i++;
-            }
-
-            if (trackName != null) {
                 progressBar.setVisibility(View.GONE);
-                artName.setText(trackName);
-                String generosFim = generosString.toString();
-                generosFim = generosFim.replace("[","");
-                generosFim = generosFim.replace("]","");
-                Log.i("ARRAY", generosFim);
-                tvGenero.setText("Gêneros: "+generosFim);
 
-                Uri uriimg = Uri.parse(urlImg);
-                Glide.with(this)
-                        .load(uriimg)
-                        .into(pic);
-
-            } else {
-                artName.setText("Nenhum resltado");
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+
         }
     }
 
@@ -190,11 +187,23 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
 
     }
 
-    public void pesquisa(){
+    public void pesquisa() {
         progressBar.setVisibility(View.VISIBLE);
-        btSpot.setVisibility(View.VISIBLE);
+        tvSearchArt.setVisibility(View.GONE);
+        searchArt.setVisibility(View.GONE);
+        if (arrayListArtists != null) arrayListArtists.clear();
         Bundle queryBundle = new Bundle();
         queryBundle.putString("parameter", stringParam);
         getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
     }
+
+    private void ref(View view) {
+        param = view.findViewById(R.id.editTextArt);
+        progressBar = view.findViewById(R.id.progressBarArtRecycler);
+        btPesq = view.findViewById(R.id.btnPesqArtist);
+        recyclerView = view.findViewById(R.id.recyclerArtists);
+        tvSearchArt = view.findViewById(R.id.tvSearchArt);
+        searchArt = view.findViewById(R.id.imageViewSearchArtists);
+    }
+
 }

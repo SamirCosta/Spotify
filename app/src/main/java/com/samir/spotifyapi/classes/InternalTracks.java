@@ -1,6 +1,7 @@
 package com.samir.spotifyapi.classes;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,6 +23,16 @@ public class InternalTracks implements Serializable {
 
     public void setListInternalTracks(Tracks internalTracks) {
         this.listInternalTracks.add(internalTracks);
+    }
+
+    public void removeInternalTracks(Tracks tracks) {
+        for (int i = 0; i < listInternalTracks.size(); i++) {
+            Tracks trackTemp = listInternalTracks.get(i);
+            if (trackTemp.getId().equals(tracks.getId())) {
+                this.listInternalTracks.remove(listInternalTracks.indexOf(trackTemp));
+                Log.i("ARRAY1", "AQUI: " + listInternalTracks.size());
+            }
+        }
     }
 
     public static ArrayList<Tracks> getArrayTracks(Context context) {

@@ -37,6 +37,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.samir.spotifyapi.R;
 import com.samir.spotifyapi.adapters.TrackAdapter;
+import com.samir.spotifyapi.classes.InternalArtists;
 import com.samir.spotifyapi.classes.InternalTracks;
 import com.samir.spotifyapi.classes.Tracks;
 import com.samir.spotifyapi.loader.LoadParam;
@@ -47,7 +48,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class TracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<String>{
+public class TracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<String> {
     private EditText param;
     private TextView tvSearchTracks;
     private ImageView searchTracks;
@@ -57,18 +58,9 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
     private RecyclerView recyclerView;
     private ArrayList<Tracks> arrayListTracks = new ArrayList<>();
     public static InternalTracks internalTracks;
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayout.VERTICAL));
-
-        TrackAdapter trackAdapter = new TrackAdapter(arrayListTracks, getActivity());
-        recyclerView.setAdapter(trackAdapter);
-    }
+    public static InternalArtists internalArtists;
+    public static RecyclerView recyclerViewTrackFav;
+    public static RecyclerView recyclerViewArtistsFav;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,13 +79,14 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         ref(view);
 
         internalTracks = new InternalTracks(getActivity());
+        internalArtists = new InternalArtists(getActivity());
 
         locale.setOnClickListener(c -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setCancelable(false);
             builder.setTitle("Localização");
             builder.setMessage("Você está no país: " + getActivity().getResources().getConfiguration().locale.getDisplayCountry()
-            + "\n\nDeseja procurar somente por músicas em seus país?");
+                    + "\n\nDeseja procurar somente por músicas em seus país?");
             builder.setPositiveButton("Sim", (dialog, which) -> country = getActivity().getResources().getConfiguration().locale.getCountry())
                     .setNegativeButton("Não", (dialog, which) -> country = null);
             builder.create();
@@ -111,7 +104,19 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
             return false;
         });
 
+        recyclerConfig();
+
         return view;
+    }
+
+    private void recyclerConfig() {
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayout.VERTICAL));
+
+        TrackAdapter trackAdapter = new TrackAdapter(arrayListTracks, getActivity());
+        recyclerView.setAdapter(trackAdapter);
     }
 
     private void search(View v) {
@@ -130,19 +135,20 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
         if (networkInfo != null && networkInfo.isConnected() && stringParam.length() != 0) {
+
             pesquisa();
-        }else {
+
+        } else {
             if (stringParam.length() == 0) {
                 param.setHint("Informe um nome");
-                param.setHintTextColor( getResources().getColor(R.color.hint));
-                param.setCompoundDrawablesRelativeWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_baseline_error_outline_24),null,null, null);
+                param.setHintTextColor(getResources().getColor(R.color.hint));
+                param.setCompoundDrawablesRelativeWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_baseline_error_outline_24), null, null, null);
 
             } else {
                 Toast.makeText(getContext(), "Verifique sua conexão.", Toast.LENGTH_LONG).show();
             }
         }
     }
-
 
     @NonNull
     @Override
@@ -158,59 +164,55 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
-        try {
-            JSONObject jsonObject = new JSONObject(data);
-            JSONObject tracksPrincipal = jsonObject.getJSONObject("tracks");
-            JSONArray itemsArray = tracksPrincipal.getJSONArray("items");
+        if (arrayListTracks.size() < 20) {
+            try {
+                JSONObject jsonObject = new JSONObject(data);
+                JSONObject tracksPrincipal = jsonObject.getJSONObject("tracks");
+                JSONArray itemsArray = tracksPrincipal.getJSONArray("items");
 
-            int i = 0;
-            while (i < itemsArray.length()){
-                Tracks tracks = new Tracks();
-                JSONObject book = itemsArray.getJSONObject(i);
-                JSONObject album = book.getJSONObject("album");
-                JSONArray img = album.getJSONArray("images");
+                for(int i = 0;i < itemsArray.length();i++) {
+                    Tracks tracks = new Tracks();
+                    JSONObject book = itemsArray.getJSONObject(i);
+                    JSONObject album = book.getJSONObject("album");
+                    JSONArray img = album.getJSONArray("images");
 
-                tracks.setMusicUri(book.getString("uri"));
-                tracks.setMusicName(book.getString("name"));
-                tracks.setId(book.getString("id"));
+                    tracks.setMusicUri(book.getString("uri"));
+                    tracks.setMusicName(book.getString("name"));
+                    tracks.setId(book.getString("id"));
 
-                JSONObject externalsUrl = book.getJSONObject("external_urls");
-                tracks.setUrlMusic(externalsUrl.getString("spotify"));
+                    JSONObject externalsUrl = book.getJSONObject("external_urls");
+                    tracks.setUrlMusic(externalsUrl.getString("spotify"));
 
-                int im = 0;
-                while (im < img.length()) {
                     JSONObject largeImage = img.getJSONObject(1);
                     tracks.setImgUrl(largeImage.getString("url"));
 
                     JSONObject smallImage = img.getJSONObject(2);
                     tracks.setImgUrlSmaller(smallImage.getString("url"));
 
-                    im++;
-                }
+                    JSONArray artistaArray = book.getJSONArray("artists");
 
-                JSONArray artistaArray = book.getJSONArray("artists");
+                    for(int a = 0;a < artistaArray.length();a++) {
+                        JSONObject book2 = artistaArray.getJSONObject(a);
+                        tracks.setArtistName(book2.getString("name"));
+                    }
 
-                int a = 0;
-                while (a < artistaArray.length()) {
-                    JSONObject book2 = artistaArray.getJSONObject(a);
-                    tracks.setArtistName(book2.getString("name"));
-                    a++;
+                    arrayListTracks.add(tracks);
+//                    Log.i("AQ","" + arrayListTracks.size());
                 }
-                arrayListTracks.add(tracks);
-                i++;
-            }
 
                 progressBar.setVisibility(View.GONE);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     @Override
-    public void onLoaderReset(@NonNull Loader<String> loader) { }
+    public void onLoaderReset(@NonNull Loader<String> loader) {
+    }
 
-    public void pesquisa(){
+    public void pesquisa() {
         progressBar.setVisibility(View.VISIBLE);
         tvSearchTracks.setVisibility(View.GONE);
         searchTracks.setVisibility(View.GONE);

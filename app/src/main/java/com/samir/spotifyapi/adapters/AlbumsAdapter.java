@@ -17,42 +17,43 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.samir.spotifyapi.R;
-import com.samir.spotifyapi.activities.FavsActivity;
+import com.samir.spotifyapi.activities.AlbDetailsActivity;
 import com.samir.spotifyapi.activities.TrackDetailsActivity;
+import com.samir.spotifyapi.classes.Albums;
+import com.samir.spotifyapi.classes.Artists;
 import com.samir.spotifyapi.classes.Tracks;
 
 import java.util.ArrayList;
 
-public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.MyViewHolder> {
-    private ArrayList<Tracks> arrayListTracks;
+public class AlbumsAdapter extends RecyclerView.Adapter<AlbumsAdapter.MyViewHolder> {
+    private ArrayList<Albums> albumsArrayList;
     private Context context;
 
-    public TrackAdapter(ArrayList<Tracks> arrayList, Context context){
-        this.arrayListTracks = arrayList;
+    public AlbumsAdapter(ArrayList<Albums> albumsArrayList, Context context) {
+        this.albumsArrayList = albumsArrayList;
         this.context = context;
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.track_adapter, parent,false);
-        return new MyViewHolder(item);
+        View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.album_adapter, parent,false);
+        return new AlbumsAdapter.MyViewHolder(item);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        Tracks tracks = arrayListTracks.get(position);
-        holder.tvMusic.setText(tracks.getMusicName());
-        holder.tvArt.setText(tracks.getArtistName());
+        Albums albums = albumsArrayList.get(position);
+        holder.textView.setText(albums.getAlbumName());
 
-        Uri uriimg = Uri.parse(tracks.getImgUrlSmaller());
+        Uri uriimg = Uri.parse(albums.getUrlImgSmall());
         Glide.with(context)
                 .load(uriimg)
                 .into(holder.imageView);
 
         holder.itemView.setOnClickListener(c -> {
-            Intent intent = new Intent(context, TrackDetailsActivity.class);
-            intent.putExtra("track", tracks);
+            Intent intent = new Intent(context, AlbDetailsActivity.class);
+            intent.putExtra("album", albums);
             ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(
                     (Activity) context,
                     holder.imageView,
@@ -64,18 +65,18 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.MyViewHolder
 
     @Override
     public int getItemCount() {
-        return arrayListTracks.size();
+        return albumsArrayList.size();
     }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder{
-        TextView tvMusic, tvArt;
+    public class MyViewHolder extends RecyclerView.ViewHolder{
         ImageView imageView;
+        TextView textView;
 
-        public MyViewHolder(@NonNull View itemView) {
+        public MyViewHolder(@NonNull View itemView)
+        {
             super(itemView);
-            tvMusic = itemView.findViewById(R.id.tvMusicName);
-            tvArt = itemView.findViewById(R.id.tvArtName);
-            imageView = itemView.findViewById(R.id.imageViewTrackSmall);
+            imageView = itemView.findViewById(R.id.imageViewAlbSmall);
+            textView = itemView.findViewById(R.id.tvAlbName);
         }
     }
 

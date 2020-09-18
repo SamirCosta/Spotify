@@ -1,6 +1,5 @@
 package com.samir.spotifyapi.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,13 +15,18 @@ import androidx.core.view.ViewCompat;
 
 import com.bumptech.glide.Glide;
 import com.samir.spotifyapi.R;
+import com.samir.spotifyapi.classes.InternalTracks;
 import com.samir.spotifyapi.classes.Tracks;
+import com.samir.spotifyapi.fragments.TracksFavFragment;
+import com.samir.spotifyapi.fragments.TracksFragment;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
 import static com.samir.spotifyapi.fragments.TracksFragment.internalTracks;
+import static com.samir.spotifyapi.fragments.TracksFragment.recyclerViewTrackFav;
 
 public class TrackDetailsActivity extends AppCompatActivity {
     private ImageView pic, star, share;
@@ -30,6 +34,7 @@ public class TrackDetailsActivity extends AppCompatActivity {
     private TextView artName, musicName;
     boolean fav;
     private Tracks tracks;
+    private Bundle bundle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,18 +42,20 @@ public class TrackDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_track_details);
         ref();
 
+        internalTracks = new InternalTracks(getApplicationContext());
+
         Toolbar toolbar = findViewById(R.id.toolbarTrack);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        Bundle bundle = getIntent().getExtras();
-        tracks = (Tracks) bundle.getSerializable("object");
+        bundle = getIntent().getExtras();
+        tracks = (Tracks) bundle.getSerializable("track");
 
-        for(int i = 0; i < internalTracks.getListInternalTracks().size(); i++){
+        for (int i = 0; i < internalTracks.getListInternalTracks().size(); i++) {
             Tracks tracksFav = internalTracks.getListInternalTracks().get(i);
-            if (tracksFav.getId().equals(tracks.getId())){
+            if (tracksFav.getId().equals(tracks.getId())) {
                 star.setImageResource(R.drawable.ic_baseline_star_24);
                 fav = true;
             }
@@ -84,17 +91,6 @@ public class TrackDetailsActivity extends AppCompatActivity {
             }
         });
 
-        star.setOnClickListener(c -> {
-            if (fav){
-                star.setImageResource(R.drawable.ic_baseline_star_border_24);
-                fav = false;
-            }else{
-                star.setImageResource(R.drawable.ic_baseline_star_24);
-                saveInternal();
-                fav = true;
-            }
-        });
-
         share.setOnClickListener(a -> {
             Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
             whatsappIntent.setType("text/plain");
@@ -107,22 +103,42 @@ public class TrackDetailsActivity extends AppCompatActivity {
             }
         });
 
+        star.setOnClickListener(c -> {
+            if (fav) {
+                star.setImageResource(R.drawable.ic_baseline_star_border_24);
+                removeInternal();
+                fav = false;
+            } else {
+                star.setImageResource(R.drawable.ic_baseline_star_24);
+                saveInternal();
+                fav = true;
+            }
+        });
+
+    }
+
+    private void removeInternal() {
+//            internalTracks.removeInternalTracks(bundle.getInt("position"));
+        internalTracks.removeInternalTracks(tracks);
+        save();
     }
 
     private void saveInternal() {
-        try {
-            internalTracks.setListInternalTracks(tracks);
+        internalTracks.setListInternalTracks(tracks);
+        save();
+    }
 
+    private void save() {
+        try {
             FileOutputStream fos = new FileOutputStream(this.getFileStreamPath("streamFile"));
             ObjectOutputStream oos = new ObjectOutputStream(fos);
 
             oos.writeObject(internalTracks);
             oos.close();
             fos.close();
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     private void ref() {
