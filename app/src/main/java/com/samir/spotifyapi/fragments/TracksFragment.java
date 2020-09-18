@@ -2,12 +2,21 @@ package com.samir.spotifyapi.fragments;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,24 +28,9 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
 import com.samir.spotifyapi.R;
 import com.samir.spotifyapi.adapters.TrackAdapter;
+import com.samir.spotifyapi.classes.InternalAlbums;
 import com.samir.spotifyapi.classes.InternalArtists;
 import com.samir.spotifyapi.classes.InternalTracks;
 import com.samir.spotifyapi.classes.Tracks;
@@ -59,8 +53,11 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
     private ArrayList<Tracks> arrayListTracks = new ArrayList<>();
     public static InternalTracks internalTracks;
     public static InternalArtists internalArtists;
+    public static InternalAlbums internalAlbums;
     public static RecyclerView recyclerViewTrackFav;
     public static RecyclerView recyclerViewArtistsFav;
+    public static RecyclerView recyclerViewAlbumsFav;
+    int savedInstanceVisible;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,6 +77,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 
         internalTracks = new InternalTracks(getActivity());
         internalArtists = new InternalArtists(getActivity());
+        internalAlbums = new InternalAlbums(getActivity());
 
         locale.setOnClickListener(c -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -197,7 +195,6 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                     }
 
                     arrayListTracks.add(tracks);
-//                    Log.i("AQ","" + arrayListTracks.size());
                 }
 
                 progressBar.setVisibility(View.GONE);
@@ -233,4 +230,21 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         searchTracks = view.findViewById(R.id.imageViewSearchTracks);
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        savedInstanceVisible = tvSearchTracks.getVisibility();
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        tvSearchTracks.setVisibility(savedInstanceVisible);
+        searchTracks.setVisibility(savedInstanceVisible);
+
+        if (arrayListTracks.size() > 0){
+            tvSearchTracks.setVisibility(View.GONE);
+            searchTracks.setVisibility(View.GONE);
+        }
+    }
 }

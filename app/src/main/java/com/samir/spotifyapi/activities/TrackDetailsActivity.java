@@ -70,8 +70,6 @@ public class TrackDetailsActivity extends AppCompatActivity {
                     .load(uriimg)
                     .into(pic);
 
-        } else {
-            artName.setText("Nenhum resltado");
         }
 
         pic.setOnClickListener(a -> {

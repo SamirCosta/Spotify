@@ -11,6 +11,15 @@ public class Albums implements Serializable {
     String urlImgSmall;
     String urlImg;
     String albumUri;
+    String albumUrl;
+
+    public String getAlbumUrl() {
+        return albumUrl;
+    }
+
+    public void setAlbumUrl(String albumUrl) {
+        this.albumUrl = albumUrl;
+    }
 
     public String getAlbumName() {
         return albumName;

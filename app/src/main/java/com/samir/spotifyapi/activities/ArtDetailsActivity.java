@@ -66,8 +66,6 @@ public class ArtDetailsActivity extends AppCompatActivity {
                     .load(uriimg)
                     .into(pic);
 
-        } else {
-            artName.setText("Nenhum resltado");
         }
 
         share.setOnClickListener(a -> {

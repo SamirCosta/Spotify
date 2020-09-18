@@ -2,11 +2,21 @@ package com.samir.spotifyapi.fragments;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,26 +28,9 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
 import com.samir.spotifyapi.R;
 import com.samir.spotifyapi.adapters.AlbumsAdapter;
-import com.samir.spotifyapi.adapters.TrackAdapter;
 import com.samir.spotifyapi.classes.Albums;
-import com.samir.spotifyapi.classes.Tracks;
 import com.samir.spotifyapi.loader.LoadParam;
 
 import org.json.JSONArray;
@@ -55,6 +48,7 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView tvPesq;
     private ImageView searchAlb;
     private ArrayList<Albums> albumsArrayList = new ArrayList<>();
+    private int savedInstanceVisible;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -184,6 +178,9 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
                     JSONObject art = artArray.getJSONObject(0);
                     albums.setAlbumArtName(art.getString("name"));
 
+                    JSONObject externalsUrl = book.getJSONObject("external_urls");
+                    albums.setAlbumUrl(externalsUrl.getString("spotify"));
+
                     albumsArrayList.add(albums);
 
                 }
@@ -220,6 +217,24 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         recyclerView = view.findViewById(R.id.recyclerAlbums);
         tvPesq = view.findViewById(R.id.tvSearchAlbums);
         searchAlb = view.findViewById(R.id.imageViewSearchAlbums);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        savedInstanceVisible = tvPesq.getVisibility();
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        tvPesq.setVisibility(savedInstanceVisible);
+        searchAlb.setVisibility(savedInstanceVisible);
+
+        if (albumsArrayList.size() > 0){
+            tvPesq.setVisibility(View.GONE);
+            searchAlb.setVisibility(View.GONE);
+        }
     }
 
 }

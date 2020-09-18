@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class InternalTracks implements Serializable {
 
-    ArrayList<Tracks> listInternalTracks = new ArrayList<>();
+    ArrayList<Tracks> listInternalTracks;
 
     public InternalTracks(Context context) {
         this.listInternalTracks = getArrayTracks(context);
