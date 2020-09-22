@@ -10,4 +10,9 @@
     <string name="search_for_tracks">Search for tracks</string>
     <string name="search_for_artists">Search for artists</string>
     <string name="search_for_albums">Search for albums</string>
+    <string name="log_out">Log out</string>
+    <string name="login">Login</string>
+    <string name="user">User</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign in</string>
 </resources>
