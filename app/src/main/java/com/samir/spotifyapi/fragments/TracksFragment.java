@@ -1,10 +1,16 @@
 package com.samir.spotifyapi.fragments;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +27,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -28,6 +35,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.samir.spotifyapi.R;
 import com.samir.spotifyapi.adapters.TrackAdapter;
 import com.samir.spotifyapi.classes.InternalAlbums;
@@ -40,16 +51,20 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class TracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<String> {
     private EditText param;
     private TextView tvSearchTracks;
     private ImageView searchTracks;
     private CardView btPesq, locale;
-    private String stringParam, country;
+    private String stringParam, country, address;
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
+    private FusedLocationProviderClient fusedLocation;
     private ArrayList<Tracks> arrayListTracks = new ArrayList<>();
     public static InternalTracks internalTracks;
     public static InternalArtists internalArtists;
@@ -67,6 +82,15 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
             getLoaderManager().initLoader(0, null, this);
         }
 
+        fusedLocation = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        if (ActivityCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]
+                    {Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+
     }
 
     @Override
@@ -79,11 +103,14 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         internalArtists = new InternalArtists(getActivity());
         internalAlbums = new InternalAlbums(getActivity());
 
+        getLocation();
+
         locale.setOnClickListener(c -> {
+            if (address == null) address = "";
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setCancelable(false);
             builder.setTitle("Localização");
-            builder.setMessage("Você está no país: " + getActivity().getResources().getConfiguration().locale.getDisplayCountry()
+            builder.setMessage("Seu endereço: " + address
                     + "\n\nDeseja procurar somente por músicas em seus país?");
             builder.setPositiveButton("Sim", (dialog, which) -> country = getActivity().getResources().getConfiguration().locale.getCountry())
                     .setNegativeButton("Não", (dialog, which) -> country = null);
@@ -105,6 +132,27 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         recyclerConfig();
 
         return view;
+    }
+
+    private void getLocation() {
+        if (ActivityCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocation.getLastLocation().addOnCompleteListener(task -> {
+                try {
+                    Location location = task.getResult();
+                    if (location != null) {
+                        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
+
+                        List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                        address = addresses.get(0).getAddressLine(0);
+                        Log.i("LOC", addresses.get(0).getAddressLine(0));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
     }
 
     private void recyclerConfig() {
@@ -168,7 +216,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                 JSONObject tracksPrincipal = jsonObject.getJSONObject("tracks");
                 JSONArray itemsArray = tracksPrincipal.getJSONArray("items");
 
-                for(int i = 0;i < itemsArray.length();i++) {
+                for (int i = 0; i < itemsArray.length(); i++) {
                     Tracks tracks = new Tracks();
                     JSONObject book = itemsArray.getJSONObject(i);
                     JSONObject album = book.getJSONObject("album");
@@ -189,7 +237,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 
                     JSONArray artistaArray = book.getJSONArray("artists");
 
-                    for(int a = 0;a < artistaArray.length();a++) {
+                    for (int a = 0; a < artistaArray.length(); a++) {
                         JSONObject book2 = artistaArray.getJSONObject(a);
                         tracks.setArtistName(book2.getString("name"));
                     }
@@ -242,7 +290,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         tvSearchTracks.setVisibility(savedInstanceVisible);
         searchTracks.setVisibility(savedInstanceVisible);
 
-        if (arrayListTracks.size() > 0){
+        if (arrayListTracks.size() > 0) {
             tvSearchTracks.setVisibility(View.GONE);
             searchTracks.setVisibility(View.GONE);
         }

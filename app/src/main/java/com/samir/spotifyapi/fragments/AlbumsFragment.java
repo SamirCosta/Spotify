@@ -1,10 +1,16 @@
 package com.samir.spotifyapi.fragments;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +27,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -28,6 +35,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.samir.spotifyapi.R;
 import com.samir.spotifyapi.adapters.AlbumsAdapter;
 import com.samir.spotifyapi.classes.Albums;
@@ -37,16 +46,20 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCallbacks<String> {
     private EditText param;
-    private String stringParam, country;
+    private String stringParam, country, address;
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
     private CardView btPesq, locale;
     private TextView tvPesq;
     private ImageView searchAlb;
+    private FusedLocationProviderClient fusedLocation;
     private ArrayList<Albums> albumsArrayList = new ArrayList<>();
     private int savedInstanceVisible;
 
@@ -58,6 +71,8 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
             getLoaderManager().initLoader(0, null, this);
         }
 
+        fusedLocation = LocationServices.getFusedLocationProviderClient(getActivity());
+
     }
 
     @Override
@@ -65,6 +80,8 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_albums, container, false);
         ref(view);
+
+        getLocation();
 
         progressBar.setVisibility(View.GONE);
 
@@ -85,7 +102,7 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setCancelable(false);
             builder.setTitle("Localização");
-            builder.setMessage("Você está no país: " + getActivity().getResources().getConfiguration().locale.getDisplayCountry()
+            builder.setMessage("Seu endereço: " + address
                     + "\n\nDeseja procurar somente por álbuns em seus país?");
             builder.setPositiveButton("Sim", (dialog, which) -> country = getActivity().getResources().getConfiguration().locale.getCountry())
                     .setNegativeButton("Não", (dialog, which) -> country = null);
@@ -135,6 +152,27 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
         AlbumsAdapter albumsAdapter = new AlbumsAdapter(albumsArrayList, getActivity());
         recyclerView.setAdapter(albumsAdapter);
+    }
+
+    private void getLocation() {
+        if (ActivityCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocation.getLastLocation().addOnCompleteListener(task -> {
+                try {
+                    Location location = task.getResult();
+                    if (location != null) {
+                        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
+
+                        List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                        address = addresses.get(0).getAddressLine(0);
+                        Log.i("LOC", addresses.get(0).getAddressLine(0));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
     }
 
     @NonNull
