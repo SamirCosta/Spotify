@@ -1,17 +1,12 @@
 <resources>
     <string name="app_name">Search on Spotify</string>
-    <string name="btnFaixas">Procurar por faixas</string>
-    <string name="btnArtistas">Procurar por artistas</string>
-    <string name="btnAlbuns">Procurar por álbuns</string>
-    <string name="tvTrack">Digite o nome da faixa</string>
-    <string name="tvArt">Digite o nome do artista</string>
-    <string name="btnPesq">Pesquisar</string>
+    <string name="tvTrack">Type the track name</string>
+    <string name="tvArt">Type the artist name</string>
+    <string name="tvAlb">Type the album name</string>
     <string name="favorites">Favorites</string>
     <string name="tracks">Tracks</string>
     <string name="artists">Artists</string>
     <string name="albums">Albums</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="search_for_tracks">Search for tracks</string>
     <string name="search_for_artists">Search for artists</string>
     <string name="search_for_albums">Search for albums</string>
