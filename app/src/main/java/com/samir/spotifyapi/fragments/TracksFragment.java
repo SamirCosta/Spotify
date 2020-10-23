@@ -41,6 +41,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.samir.spotifyapi.R;
 import com.samir.spotifyapi.adapters.TrackAdapter;
+import com.samir.spotifyapi.classes.DatabaseHelper;
 import com.samir.spotifyapi.classes.InternalAlbums;
 import com.samir.spotifyapi.classes.InternalArtists;
 import com.samir.spotifyapi.classes.InternalTracks;
@@ -73,6 +74,7 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
     public static RecyclerView recyclerViewArtistsFav;
     public static RecyclerView recyclerViewAlbumsFav;
     int savedInstanceVisible;
+    DatabaseHelper databaseHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -90,6 +92,9 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
             ActivityCompat.requestPermissions(getActivity(), new String[]
                     {Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
+
+        databaseHelper = new DatabaseHelper(getActivity());
+//        databaseHelper.deleteAll();
 
     }
 
@@ -161,8 +166,6 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayout.VERTICAL));
 
-        TrackAdapter trackAdapter = new TrackAdapter(arrayListTracks, getActivity());
-        recyclerView.setAdapter(trackAdapter);
     }
 
     private void search(View v) {
@@ -242,10 +245,14 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
                         tracks.setArtistName(book2.getString("name"));
                     }
 
+                    databaseHelper.insertTrack(tracks);
                     arrayListTracks.add(tracks);
                 }
 
                 progressBar.setVisibility(View.GONE);
+
+                TrackAdapter trackAdapter = new TrackAdapter(arrayListTracks, getActivity());
+                recyclerView.setAdapter(trackAdapter);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -262,10 +269,24 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         tvSearchTracks.setVisibility(View.GONE);
         searchTracks.setVisibility(View.GONE);
         if (arrayListTracks != null) arrayListTracks.clear();
-        Bundle queryBundle = new Bundle();
-        queryBundle.putString("parameter", stringParam);
-        queryBundle.putString("country", country);
-        getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
+
+        ArrayList<Tracks> listTrackDatabase = databaseHelper.getTracksList(stringParam);
+
+
+        if (listTrackDatabase.size() >= 20) {
+            for(int i = 0; i < listTrackDatabase.size(); i++){
+                Log.i("DATABASE", listTrackDatabase.get(i).getMusicName());
+            }
+
+            TrackAdapter trackAdapter = new TrackAdapter(listTrackDatabase, getActivity());
+            recyclerView.setAdapter(trackAdapter);
+            progressBar.setVisibility(View.GONE);
+        } else {
+            Bundle queryBundle = new Bundle();
+            queryBundle.putString("parameter", stringParam);
+            queryBundle.putString("country", country);
+            getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
+        }
     }
 
     private void ref(View view) {
