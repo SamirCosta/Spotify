@@ -40,6 +40,8 @@ import com.google.android.gms.location.LocationServices;
 import com.samir.spotifyapi.R;
 import com.samir.spotifyapi.adapters.AlbumsAdapter;
 import com.samir.spotifyapi.classes.Albums;
+import com.samir.spotifyapi.classes.Artists;
+import com.samir.spotifyapi.classes.DatabaseHelper;
 import com.samir.spotifyapi.loader.LoadParam;
 
 import org.json.JSONArray;
@@ -62,6 +64,7 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
     private FusedLocationProviderClient fusedLocation;
     private ArrayList<Albums> albumsArrayList = new ArrayList<>();
     private int savedInstanceVisible;
+    DatabaseHelper databaseHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,6 +75,9 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
         fusedLocation = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        databaseHelper = new DatabaseHelper(getActivity());
+//        databaseHelper.deleteAll();
 
     }
 
@@ -219,11 +225,14 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
                     JSONObject externalsUrl = book.getJSONObject("external_urls");
                     albums.setAlbumUrl(externalsUrl.getString("spotify"));
 
+                    databaseHelper.insertAlbums(albums);
                     albumsArrayList.add(albums);
 
                 }
 
                 progressBar.setVisibility(View.GONE);
+                AlbumsAdapter albumsAdapter = new AlbumsAdapter(albumsArrayList, getActivity());
+                recyclerView.setAdapter(albumsAdapter);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -241,10 +250,24 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         searchAlb.setVisibility(View.GONE);
         tvPesq.setVisibility(View.GONE);
         if (albumsArrayList != null) albumsArrayList.clear();
-        Bundle queryBundle = new Bundle();
-        queryBundle.putString("parameter", stringParam);
-        queryBundle.putString("country", country);
-        getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
+
+        ArrayList<Albums> listAlbDatabase = databaseHelper.getAlbumsList(stringParam);
+
+        if (listAlbDatabase.size() >= 20) {
+            for(int i = 0; i < listAlbDatabase.size(); i++){
+                Log.i("DATABASE", listAlbDatabase.get(i).getAlbumName());
+            }
+
+            AlbumsAdapter albumsAdapter = new AlbumsAdapter(listAlbDatabase, getActivity());
+            recyclerView.setAdapter(albumsAdapter);
+            progressBar.setVisibility(View.GONE);
+
+        } else {
+            Bundle queryBundle = new Bundle();
+            queryBundle.putString("parameter", stringParam);
+            queryBundle.putString("country", country);
+            getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
+        }
     }
 
     private void ref(View view) {
@@ -269,7 +292,7 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         tvPesq.setVisibility(savedInstanceVisible);
         searchAlb.setVisibility(savedInstanceVisible);
 
-        if (albumsArrayList.size() > 0){
+        if (albumsArrayList.size() > 0) {
             tvPesq.setVisibility(View.GONE);
             searchAlb.setVisibility(View.GONE);
         }
