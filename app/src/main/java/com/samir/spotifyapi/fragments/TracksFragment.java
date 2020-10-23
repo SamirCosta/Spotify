@@ -166,6 +166,8 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
         recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayout.VERTICAL));
 
+        TrackAdapter trackAdapter = new TrackAdapter(arrayListTracks, getActivity());
+        recyclerView.setAdapter(trackAdapter);
     }
 
     private void search(View v) {
@@ -272,11 +274,10 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 
         ArrayList<Tracks> listTrackDatabase = databaseHelper.getTracksList(stringParam);
 
-
         if (listTrackDatabase.size() >= 20) {
-            for(int i = 0; i < listTrackDatabase.size(); i++){
+            /*for(int i = 0; i < listTrackDatabase.size(); i++){
                 Log.i("DATABASE", listTrackDatabase.get(i).getMusicName());
-            }
+            }*/
 
             TrackAdapter trackAdapter = new TrackAdapter(listTrackDatabase, getActivity());
             recyclerView.setAdapter(trackAdapter);

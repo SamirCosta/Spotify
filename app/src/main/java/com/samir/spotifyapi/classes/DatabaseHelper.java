@@ -14,6 +14,7 @@ import java.util.ArrayList;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "SpotifyDatabase";
+
     private static final String ID = "id";
     private static final String MUSIC_NAME = "musicName";
     private static final String ARTIST_NAME = "artistName";
@@ -21,6 +22,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String IMG_URL_SMALLER = "imgUrlSmaller";
     private static final String MUSIC_URI = "musicUri";
     private static final String URL_MUSIC = "urlMusic";
+
+    private static final String ART_ID = "idArt";
+    private static final String ART_NAME = "artName";
+    private static final String GENRES = "genres";
+    private static final String URL_IMG_ART = "urlImgArt";
+    private static final String URL_IMG_ART_SMALL = "urlImgArtSmall";
+    private static final String ART_URI = "artUri";
+    private static final String ART_URL = "artUrl";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -35,11 +44,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         " imgUrl text, imgUrlSmaller text, musicUri text, urlMusic text)"
         );
 
+        db.execSQL(
+                "create table ARTISTS " +
+                        "(idArt text primary key, artName text, genres text," +
+                        " urlImgArt text, urlImgArtSmall text, artUri text, artUrl text)"
+        );
+
+        Log.i("AQUI", "CRIOU");
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS TRACKS");
+        db.execSQL("DROP TABLE IF EXISTS ARTISTS");
         onCreate(db);
     }
 
@@ -89,7 +107,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public ArrayList<String> getIds() {
-        ArrayList<String> array_list = new ArrayList<String>();
+        ArrayList<String> array_list = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select id from TRACKS", null );
@@ -108,6 +126,67 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.delete("TRACKS",
                 null,
                 null);
+    }
+
+    public void insertArtists (Artists artists) {
+        boolean contains = true;
+        ArrayList<String> ids = this.getArtIds();
+        for (int i = 0; i < ids.size(); i++){
+            if (ids.get(i).equals(artists.getIdArt())) contains = false;
+        }
+        if (contains){
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(ART_ID, artists.getIdArt());
+            contentValues.put(ART_NAME, artists.getArtName());
+            contentValues.put(GENRES, artists.getGenres());
+            contentValues.put(URL_IMG_ART, artists.getUrlImgArt());
+            contentValues.put(URL_IMG_ART_SMALL, artists.getUrlImgArtSmall());
+            contentValues.put(ART_URI, artists.getArtUri());
+            contentValues.put(ART_URL, artists.getArtUrl());
+            db.insert("ARTISTS", null, contentValues);
+            Log.i("AQUI", "INSERIU");
+        }
+
+    }
+
+    public ArrayList<Artists> getArtistsList(String name) {
+        ArrayList<Artists> lista = new ArrayList<>() ;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select * from ARTISTS where artName like '" + name + "%'", null );
+        res.moveToFirst();
+
+        while(res.isAfterLast() == false){
+            Artists artists = new Artists();
+            artists.setIdArt(res.getString(res.getColumnIndex(ART_ID)));
+            artists.setArtName(res.getString(res.getColumnIndex(ART_NAME)));
+            artists.setGenres(res.getString(res.getColumnIndex(GENRES)));
+            artists.setUrlImgArt(res.getString(res.getColumnIndex(URL_IMG_ART)));
+            artists.setUrlImgArtSmall(res.getString(res.getColumnIndex(URL_IMG_ART_SMALL)));
+            artists.setArtUri(res.getString(res.getColumnIndex(ART_URI)));
+            artists.setArtUrl(res.getString(res.getColumnIndex(ART_URL)));
+
+            lista.add(artists);
+            res.moveToNext();
+        }
+
+        return lista;
+    }
+
+    public ArrayList<String> getArtIds() {
+        ArrayList<String> array_list = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor res =  db.rawQuery( "select idArt from ARTISTS", null );
+        res.moveToFirst();
+
+        while(res.isAfterLast() == false){
+            array_list.add(res.getString(res.getColumnIndex(ART_ID)));
+            res.moveToNext();
+        }
+
+        return array_list;
     }
 
 }

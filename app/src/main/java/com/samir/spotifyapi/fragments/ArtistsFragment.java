@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +31,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.samir.spotifyapi.R;
 import com.samir.spotifyapi.adapters.ArtistAdapter;
 import com.samir.spotifyapi.classes.Artists;
+import com.samir.spotifyapi.classes.DatabaseHelper;
+import com.samir.spotifyapi.classes.Tracks;
 import com.samir.spotifyapi.loader.LoadParam;
 
 import org.json.JSONArray;
@@ -47,6 +50,7 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
     private RecyclerView recyclerView;
     private TextView tvSearchArt;
     private ImageView searchArt;
+    DatabaseHelper databaseHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,6 +59,9 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         if (getLoaderManager().getLoader(0) != null) {
             getLoaderManager().initLoader(0, null, this);
         }
+
+        databaseHelper = new DatabaseHelper(getActivity());
+//        databaseHelper.deleteAll();
 
     }
 
@@ -139,8 +146,7 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
 
                 ArrayList<String> generosString = new ArrayList<>();
 
-                int i = 0;
-                while (i < itemsArray.length()) {
+                for (int i = 0; i < itemsArray.length(); i++) {
                     Artists artists = new Artists();
                     JSONObject book = itemsArray.getJSONObject(i);
                     JSONArray generos = book.getJSONArray("genres");
@@ -169,11 +175,14 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
                     generosFim = generosFim.replace("]", "");
                     artists.setGenres(generosFim);
 
+                    databaseHelper.insertArtists(artists);
                     arrayListArtists.add(artists);
-                    i++;
                 }
 
                 progressBar.setVisibility(View.GONE);
+
+                ArtistAdapter artistAdapter = new ArtistAdapter(arrayListArtists, getActivity());
+                recyclerView.setAdapter(artistAdapter);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -192,9 +201,23 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         tvSearchArt.setVisibility(View.GONE);
         searchArt.setVisibility(View.GONE);
         if (arrayListArtists != null) arrayListArtists.clear();
-        Bundle queryBundle = new Bundle();
-        queryBundle.putString("parameter", stringParam);
-        getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
+
+        ArrayList<Artists> listArtDatabase = databaseHelper.getArtistsList(stringParam);
+
+        if (listArtDatabase.size() >= 20){
+            for(int i = 0; i < listArtDatabase.size(); i++){
+                Log.i("DATABASE", listArtDatabase.get(i).getArtName());
+            }
+
+            ArtistAdapter artistAdapter = new ArtistAdapter(listArtDatabase, getActivity());
+            recyclerView.setAdapter(artistAdapter);
+            progressBar.setVisibility(View.GONE);
+
+        }else{
+            Bundle queryBundle = new Bundle();
+            queryBundle.putString("parameter", stringParam);
+            getActivity().getSupportLoaderManager().restartLoader(0, queryBundle, this);
+        }
     }
 
     private void ref(View view) {
